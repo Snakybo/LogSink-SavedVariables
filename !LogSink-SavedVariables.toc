@@ -1,0 +1,24 @@
+## Interface: 120001, 50503, 11508
+## Title: LogSink: SavedVariables
+## Author: Snakybo
+## Notes: A log sink for LibLog-1.0 that captures logs of the current session and saves them to saved variables.
+## Version: @project-version@
+## SavedVariables: LogSinkSavedVariablesDB
+## Category: Development Tools
+## Category-deDE: Entwicklungstools
+## Category-esES: Herramientas de Desarrollo
+## Category-esMX: Herramientas de Desarrollo
+## Category-frFR: Outils de Développement
+## Category-itIT: Strumenti di sviluppo
+## Category-koKR:
+## Category-ptBR: Ferramentas de Desenvolvimento
+## Category-ruRU: Инструменты разработки
+## Category-zhCN: 开发工具
+## Category-zhTW: 開發工具
+## X-Website: https://github.com/Snakybo/LogSink-SavedVariables
+## X-Curse-Project-ID: 1465575
+## X-Github: https://github.com/Snakybo/LogSink-SavedVariables
+
+Libs.xml
+
+LogSinkSavedVariables.lua

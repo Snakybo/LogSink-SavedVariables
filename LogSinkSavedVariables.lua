@@ -147,8 +147,8 @@ end
 ---
 --- See the local `NotifyCallbacks` function for an example.
 ---
---- @param result? table<string, LibLog-1.0.LogMessage>
---- @return table<string, LibLog-1.0.LogMessage>
+--- @param result? table<string, LibLog-1.0.LogMessage[]>
+--- @return table<string, LibLog-1.0.LogMessage[]>
 function LogSinkSavedVariables:GetBuffer(result)
 	result = result or {}
 

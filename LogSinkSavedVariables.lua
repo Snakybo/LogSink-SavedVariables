@@ -33,6 +33,7 @@ local logs = {}
 --- @type BufferRestoreCallback[]
 local callbacks = {}
 
+local sessionId = 1
 local initialized = false
 
 --- @param addon string
@@ -94,7 +95,9 @@ local function PLAYER_ENTERING_WORLD(_, _, isReload)
 	local addedAny = false
 
 	if isReload and LogSinkSavedVariablesDB ~= nil then
-		for addon, buffer in pairs(LogSinkSavedVariablesDB) do
+		sessionId = LogSinkSavedVariablesDB.sessionId + 1
+
+		for addon, buffer in pairs(LogSinkSavedVariablesDB.buffer) do
 			local cache = logs[addon]
 			logs[addon] = nil
 
@@ -120,7 +123,15 @@ local function PLAYER_ENTERING_WORLD(_, _, isReload)
 end
 
 local function PLAYER_LOGOUT()
-	LogSinkSavedVariablesDB = LogSinkSavedVariables:GetBuffer(LogSinkSavedVariablesDB)
+	LogSinkSavedVariablesDB.buffer = LogSinkSavedVariables:GetBuffer(LogSinkSavedVariablesDB.buffer)
+	LogSinkSavedVariablesDB.sessionId = sessionId
+
+	for _, buffer in pairs(LogSinkSavedVariablesDB.buffer) do
+		for _, log in ipairs(buffer) do
+			--- @diagnostic disable-next-line: inject-field
+			log.sessionId = log.sessionId or sessionId
+		end
+	end
 end
 
 --- @private

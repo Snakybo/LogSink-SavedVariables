@@ -1,4 +1,4 @@
--- LogSink: SavedVariables, an addon that captures the output of LibLog-1.0, and saves it in saved variables.
+-- LogSink: SavedVariables, an addon that captures the output of LibLog, and saves it in saved variables.
 -- Copyright (C) 2026  Kevin Krol
 --
 -- This program is free software: you can redistribute it and/or modify
@@ -14,16 +14,20 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-local LibLog = LibStub("LibLog-1.0")
+local LibLog = LibStub("LibLog")
 
 --- @class LogSinkSavedVariables : AceAddon, AceEvent-3.0
 LogSinkSavedVariables = LibStub("AceAddon-3.0"):NewAddon("LogSinkSavedVariables", "AceEvent-3.0")
 
+--- @class DBSchema
+--- @field public sessionId integer
+--- @field public buffer table<string, LibLog.LogMessage[]>
+
 --- @class LogBuffer
---- @field public entries LibLog-1.0.LogMessage[]
+--- @field public entries LibLog.LogMessage[]
 --- @field public head integer
 
---- @alias BufferRestoreCallback fun(buffer: LibLog-1.0.LogMessage[])
+--- @alias BufferRestoreCallback fun(buffer: LibLog.LogMessage[])
 
 local MAX_LOGS_PER_ADDON = 1000
 
@@ -37,7 +41,7 @@ local sessionId = 1
 local initialized = false
 
 --- @param addon string
---- @param message LibLog-1.0.LogMessage
+--- @param message LibLog.LogMessage
 local function AddLog(addon, message)
 	local buffer = logs[addon]
 
@@ -54,7 +58,7 @@ local function AddLog(addon, message)
 end
 
 local function GetSortedBuffer()
-	--- @type LibLog-1.0.LogMessage[]
+	--- @type LibLog.LogMessage[]
 	local result = {}
 
 	for _, buffer in pairs(LogSinkSavedVariables:GetBuffer()) do
@@ -82,7 +86,7 @@ local function NotifyCallbacks()
 	end
 end
 
---- @param message LibLog-1.0.LogMessage
+--- @param message LibLog.LogMessage
 local function OnLogReceived(message)
 	if message.addon == nil then
 		return
@@ -91,13 +95,19 @@ local function OnLogReceived(message)
 	AddLog(message.addon, message)
 end
 
-local function PLAYER_ENTERING_WORLD(_, _, isReload)
+--- @param event string
+--- @param isInitialLogin boolean
+--- @param isReload boolean
+local function PLAYER_ENTERING_WORLD(event, isInitialLogin, isReload)
 	local addedAny = false
 
-	if isReload and LogSinkSavedVariablesDB ~= nil then
-		sessionId = LogSinkSavedVariablesDB.sessionId + 1
+	--- @type DBSchema?
+	local db = LogSinkSavedVariablesDB
 
-		for addon, buffer in pairs(LogSinkSavedVariablesDB.buffer) do
+	if isReload and db ~= nil then
+		sessionId = db.sessionId + 1
+
+		for addon, buffer in pairs(db.buffer) do
 			local cache = logs[addon]
 			logs[addon] = nil
 
@@ -115,7 +125,6 @@ local function PLAYER_ENTERING_WORLD(_, _, isReload)
 	end
 
 	initialized = true
-	LogSinkSavedVariablesDB = {}
 
 	if addedAny and #callbacks > 0 then
 		NotifyCallbacks()
@@ -123,12 +132,15 @@ local function PLAYER_ENTERING_WORLD(_, _, isReload)
 end
 
 local function PLAYER_LOGOUT()
-	LogSinkSavedVariablesDB.buffer = LogSinkSavedVariables:GetBuffer(LogSinkSavedVariablesDB.buffer)
-	LogSinkSavedVariablesDB.sessionId = sessionId
+	--- @type DBSchema
+	LogSinkSavedVariablesDB = {
+		buffer = LogSinkSavedVariables:GetBuffer(LogSinkSavedVariablesDB.buffer),
+		sessionId = sessionId
+	}
 
 	for _, buffer in pairs(LogSinkSavedVariablesDB.buffer) do
 		for _, log in ipairs(buffer) do
-			--- @diagnostic disable-next-line: inject-field
+			---@diagnostic disable-next-line: inject-field
 			log.sessionId = log.sessionId or sessionId
 		end
 	end
@@ -147,8 +159,8 @@ end
 ---
 --- See the local `NotifyCallbacks` function for an example.
 ---
---- @param result? table<string, LibLog-1.0.LogMessage[]>
---- @return table<string, LibLog-1.0.LogMessage[]>
+--- @param result? table<string, LibLog.LogMessage[]>
+--- @return table<string, LibLog.LogMessage[]>
 function LogSinkSavedVariables:GetBuffer(result)
 	result = result or {}
 

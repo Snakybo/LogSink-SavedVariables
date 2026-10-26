@@ -1,6 +1,6 @@
 # LogSink: SavedVariables
 
-A simple sink for [LibLog-1.0](https://github.com/Snakybo/LibLog-1.0) that captures the logging stream and persists it in saved variables, per session.
+A simple sink for [LibLog](https://github.com/Snakybo/LibLog) that captures the logging stream and persists it in saved variables, per session.
 
 ## Limitations
 
@@ -16,7 +16,7 @@ To use this, add this sink to your `OptionalDeps`, afterwards you can do:
 ```lua
 if LogSinkSavedVariables ~= nil then
 	LogSinkSavedVariables:GetBufferWhenAvailable(function(buffer)
-		-- buffer: LibLog-1.0.LogMessage[]
+		-- buffer: LibLog.LogMessage[]
 	end)
 end
 ```
